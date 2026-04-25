@@ -10,12 +10,28 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* ===== MODERN MINIMALIS STYLE (konsisten dengan landing page) ===== */
+        /* ===== IMPORT TIKTOK SANS ===== */
+        @font-face {
+            font-family: 'TikTok-Sans';
+            src: url('https://cdn.jsdelivr.net/gh/idmshrd/tiktok-sans-font@master/fonts/TikTokSans-Regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'TikTok-Sans';
+            src: url('https://cdn.jsdelivr.net/gh/idmshrd/tiktok-sans-font@master/fonts/TikTokSans-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        /* ===== MODERN MINIMALIS STYLE ===== */
         :root {
             --warna-utama: #3b82f6;      /* Biru modern */
             --warna-sidebar: #ffffff;    /* Sidebar putih */
             --warna-bg-konten: #f9fafb;  /* Latar abu-abu sangat terang */
-            --font-utama: 'Figtree', 'Inter', system-ui, sans-serif;
+            /* Menggunakan TikTok Sans sebagai font utama */
+            --font-utama: 'TikTok-Sans', 'Inter', system-ui, sans-serif;
         }
 
         /* Global reset */
@@ -24,6 +40,8 @@
             background-color: var(--warna-bg-konten);
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         /* Scrollbar halus */
@@ -56,7 +74,7 @@
         .page-header {
             font-weight: 700;
             font-size: 1.5rem;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
             color: #1e293b;
             margin-bottom: 1.5rem;
         }
@@ -82,10 +100,10 @@
         <div class="flex-1 flex flex-col min-w-0">
             {{-- TOPBAR minimalis --}}
             <header class="bg-white border-b border-gray-100 px-8 py-3 flex justify-end items-center shadow-sm">
-                <div class="text-xs font-medium text-gray-500 tracking-wide">
+                <div class="text-xs font-semibold text-gray-500 tracking-wide">
                     {{ Auth::user()->nama }} 
                     <span class="text-gray-400 mx-1">|</span>
-                    <span class="text-blue-500 font-semibold">{{ ucfirst(Auth::user()->role) }}</span>
+                    <span class="text-blue-500 font-bold uppercase">{{ Auth::user()->role }}</span>
                 </div>
             </header>
 

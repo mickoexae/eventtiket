@@ -1,3 +1,18 @@
+/* Import TikTok Sans */
+@font-face {
+    font-family: 'TikTok-Sans';
+    src: url('https://cdn.jsdelivr.net/gh/idmshrd/tiktok-sans-font@master/fonts/TikTokSans-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'TikTok-Sans';
+    src: url('https://cdn.jsdelivr.net/gh/idmshrd/tiktok-sans-font@master/fonts/TikTokSans-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

@@ -14,7 +14,7 @@ use App\Http\Controllers\LandingPageController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
-// Import Models
+// Import Models wajib agar query di Dashboard jalan
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Voucher;
@@ -29,13 +29,14 @@ Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes
+| Dashboard Logic (Admin, Petugas, User)
 |--------------------------------------------------------------------------
 */
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
     
+    // Default data
     $data = [
         'totalPemasukan' => 0,
         'keuntungan' => 0,
@@ -45,64 +46,75 @@ Route::get('/dashboard', function () {
     ];
 
     if ($user->role == 'admin') {
-        // Menggunakan 'total' sesuai kolom di database kamu
         $data['totalPemasukan'] = Order::where('status', 'paid')->sum('total'); 
         $data['keuntungan'] = $data['totalPemasukan'] * 0.1; 
         $data['totalUser'] = User::where('role', 'user')->count();
         $data['totalOrder'] = Order::count();
     } elseif ($user->role == 'user') {
-        $data['vouchers'] = Voucher::where('status', 'active')->latest()->get();
+        // PERBAIKAN: Ambil semua voucher agar muncul di dashboard user
+        $data['vouchers'] = Voucher::latest()->get(); 
     }
 
     return view('dashboard', $data);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes Group
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('auth')->group(function () {
     
-    // --- MANAGEMENT PROFILE ---
+    // --- PROFILE MANAGEMENT ---
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // --- FITUR UNTUK USER PELANGGAN ---
+    // --- FITUR PELANGGAN (USER ROLE) ---
     Route::get('/cari-tiket', [PelangganController::class, 'cariTiket'])->name('user.cari_tiket');
     Route::get('/cari-tiket/{id}', [PelangganController::class, 'showEvent'])->name('user.event.detail');
-    Route::post('/order/store', [OrderController::class, 'store'])->name('user.proses_bayar');
     Route::get('/checkout/{id_tiket}', [PelangganController::class, 'checkout'])->name('user.checkout');
     Route::post('/checkout-multiple', [EventController::class, 'checkoutMultiple'])->name('user.checkout_multiple');
+    Route::post('/order/store', [OrderController::class, 'store'])->name('user.proses_bayar');
     Route::get('/tiket-saya', [PelangganController::class, 'tiketSaya'])->name('user.tiket_saya');
+    
+    // Route Detail Order User (Penting!)
+    Route::get('/order/detail/{id_order}', [OrderController::class, 'show'])->name('user.order.detail');
+    
     Route::get('/e-tiket/{qr_code}', [OrderController::class, 'showEtiket'])->name('user.etiket.show');
     Route::post('/cek-voucher', [PelangganController::class, 'cekVoucher'])->name('user.cek_voucher');
 
+    // Fallback Checkout
     Route::get('/checkout-multiple', function() {
         return redirect()->route('user.cari_tiket')->with('error', 'Sesi checkout berakhir.');
     });
 
-    // --- GRUP UTAMA ADMIN ---
+    // --- ADMIN & STAFF AREA ---
     Route::prefix('admin')->name('admin.')->group(function () {
         
-        // A. Akses Bersama (Admin & Petugas)
+        // Akses Bersama: Admin & Petugas
         Route::middleware(['role:admin,petugas'])->group(function () {
             Route::get('/scanner', [AdminOrderController::class, 'scanner'])->name('scanner');
             Route::post('/scanner/prosess', [AdminOrderController::class, 'cekTiket'])->name('scanner.prosess');
             Route::get('/laporan-kehadiran', [AdminOrderController::class, 'laporanKehadiran'])->name('laporan.kehadiran');
         });
 
-        // B. Akses Khusus Admin
+        // Akses Khusus: Hanya Admin
         Route::middleware(['role:admin'])->group(function () {
-            // Perbaikan Parameter: Memberitahu Laravel pakai id_user bukan id
+            // User Management
             Route::patch('/user/{id_user}/toggle', [AdminUserController::class, 'toggleStatus'])->name('user.toggle');
-            
             Route::resource('user', AdminUserController::class)->parameters(['user' => 'id_user']);
+            
+            // Event & Tiket
             Route::resource('tiket', TiketController::class);
             Route::resource('event', EventController::class);
             Route::resource('venue', VenueController::class);
             Route::resource('voucher', VoucherController::class);
             Route::resource('petugas', PetugasController::class)->parameters(['petugas' => 'petugas']);
             
-            // Full resource untuk order (Primary key: id_order)
+            // Order & Financial
             Route::resource('order', AdminOrderController::class)->parameters(['order' => 'id_order']);
-            
             Route::get('/laporan-keuangan', [AdminOrderController::class, 'laporan'])->name('laporan');
         });
     });
