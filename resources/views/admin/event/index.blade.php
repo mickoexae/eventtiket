@@ -1,12 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-bold text-xl text-gray-800 leading-tight">
+            <h2 class="font-bold text-xl text-gray-800 leading-tight tracking-tight">
                 {{ __('Daftar Event') }}
             </h2>
-            <a href="{{ route('admin.event.create') }}" class="inline-flex items-center px-5 py-2.5 bg-blue-600 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition ease-in-out duration-150 shadow-lg shadow-blue-200">
-                + Tambah Event
-            </a>
+            <div class="flex gap-2">
+                {{-- Tombol Sampah Event (Hanya muncul jika ada data terhapus) --}}
+                @php $trashCount = \App\Models\Event::onlyTrashed()->count(); @endphp
+                @if($trashCount > 0)
+                    <a href="{{ route('admin.event.trash') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-xl font-bold text-xs text-gray-600 uppercase tracking-widest hover:bg-gray-200 transition duration-150">
+                        🗑️ Sampah ({{ $trashCount }})
+                    </a>
+                @endif
+
+                <a href="{{ route('admin.event.create') }}" class="inline-flex items-center px-5 py-2.5 bg-blue-600 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition ease-in-out duration-150 shadow-lg shadow-blue-200">
+                    + Tambah Event
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -44,10 +54,10 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @if($e->foto)
                                                 <img src="{{ asset('storage/' . $e->foto) }}" 
-                                                     class="h-14 w-20 object-cover rounded-lg shadow-sm"
+                                                     class="h-14 w-20 object-cover rounded-lg shadow-sm border border-gray-100"
                                                      alt="Poster">
                                             @else
-                                                <div class="h-14 w-20 bg-gray-100 rounded-lg flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase text-center p-1 border border-dashed border-gray-300">
+                                                <div class="h-14 w-20 bg-gray-50 rounded-lg flex items-center justify-center text-[8px] text-gray-400 font-bold uppercase text-center p-1 border border-dashed border-gray-300">
                                                     No Poster
                                                 </div>
                                             @endif
@@ -57,7 +67,7 @@
                                             {{ $e->nama_event }}
                                         </td>
                                         
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                                             <div class="flex items-center gap-2">
                                                 <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -66,25 +76,30 @@
                                             </div>
                                         </td>
 
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-600">
-                                            {{ $e->venue->nama_venue ?? 'Venue tidak ditemukan' }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold">
+                                            @if($e->venue && $e->venue->trashed())
+                                                <div class="flex flex-col">
+                                                    <span class="text-red-500 underline decoration-dotted">{{ $e->venue->nama_venue }}</span>
+                                                    <span class="text-[10px] text-red-400 font-medium italic italic leading-none">(Venue telah dihapus)</span>
+                                                </div>
+                                            @else
+                                                <span class="text-blue-600">{{ $e->venue->nama_venue ?? 'Venue tidak ditemukan' }}</span>
+                                            @endif
                                         </td>
 
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex justify-center gap-3">
+                                            <div class="flex justify-center gap-4">
                                                 <a href="{{ route('admin.event.edit', $e->id_event) }}" 
-                                                   class="text-blue-600 hover:text-blue-800 font-bold uppercase text-xs tracking-tighter">
+                                                   class="text-blue-600 hover:text-blue-800 font-bold uppercase text-[10px] tracking-wider">
                                                     Edit
                                                 </a>
 
-                                                {{-- Tombol Hapus: Menggunakan variabel $e --}}
                                                 <button type="button" 
                                                     onclick="confirmDelete('delete-form-{{ $e->id_event }}')" 
-                                                    class="text-red-600 hover:text-red-800 font-bold uppercase text-xs tracking-tighter">
+                                                    class="text-red-500 hover:text-red-700 font-bold uppercase text-[10px] tracking-wider">
                                                     Hapus
                                                 </button>
 
-                                                {{-- Form Hapus: Arahkan ke rute event.destroy --}}
                                                 <form id="delete-form-{{ $e->id_event }}" 
                                                       action="{{ route('admin.event.destroy', $e->id_event) }}" 
                                                       method="POST" class="hidden">
@@ -96,8 +111,11 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-12 text-center text-gray-500 italic font-bold">
-                                            Belum ada data event yang terdaftar.
+                                        <td colspan="6" class="px-6 py-16 text-center">
+                                            <div class="flex flex-col items-center">
+                                                <span class="text-4xl mb-2">🎫</span>
+                                                <p class="text-gray-400 italic text-sm font-bold uppercase tracking-widest">Belum ada data event.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -109,3 +127,22 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    function confirmDelete(formId) {
+        Swal.fire({
+            title: 'Pindahkan ke Sampah?',
+            text: "Event ini akan dinonaktifkan, tapi data tiket terjual tetap aman.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(formId).submit();
+            }
+        })
+    }
+</script>

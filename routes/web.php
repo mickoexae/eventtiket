@@ -24,7 +24,6 @@ use App\Models\Voucher;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
 /*
@@ -32,11 +31,9 @@ Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 | Dashboard Logic (Admin, Petugas, User)
 |--------------------------------------------------------------------------
 */
-
 Route::get('/dashboard', function () {
     $user = Auth::user();
     
-    // Default data
     $data = [
         'totalPemasukan' => 0,
         'keuntungan' => 0,
@@ -51,7 +48,6 @@ Route::get('/dashboard', function () {
         $data['totalUser'] = User::where('role', 'user')->count();
         $data['totalOrder'] = Order::count();
     } elseif ($user->role == 'user') {
-        // PERBAIKAN: Ambil semua voucher agar muncul di dashboard user
         $data['vouchers'] = Voucher::latest()->get(); 
     }
 
@@ -63,7 +59,6 @@ Route::get('/dashboard', function () {
 | Authenticated Routes Group
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth')->group(function () {
     
     // --- PROFILE MANAGEMENT ---
@@ -78,17 +73,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout-multiple', [EventController::class, 'checkoutMultiple'])->name('user.checkout_multiple');
     Route::post('/order/store', [OrderController::class, 'store'])->name('user.proses_bayar');
     Route::get('/tiket-saya', [PelangganController::class, 'tiketSaya'])->name('user.tiket_saya');
-    
-    // Route Detail Order User (Penting!)
     Route::get('/order/detail/{id_order}', [OrderController::class, 'show'])->name('user.order.detail');
-    
     Route::get('/e-tiket/{qr_code}', [OrderController::class, 'showEtiket'])->name('user.etiket.show');
     Route::post('/cek-voucher', [PelangganController::class, 'cekVoucher'])->name('user.cek_voucher');
-
-    // Fallback Checkout
-    Route::get('/checkout-multiple', function() {
-        return redirect()->route('user.cari_tiket')->with('error', 'Sesi checkout berakhir.');
-    });
 
     // --- ADMIN & STAFF AREA ---
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -102,18 +89,36 @@ Route::middleware('auth')->group(function () {
 
         // Akses Khusus: Hanya Admin
         Route::middleware(['role:admin'])->group(function () {
-            // User Management
+            
+            // 1. User Management
             Route::patch('/user/{id_user}/toggle', [AdminUserController::class, 'toggleStatus'])->name('user.toggle');
             Route::resource('user', AdminUserController::class)->parameters(['user' => 'id_user']);
             
-            // Event & Tiket
+            // 2. FITUR TRASH & RESTORE (Daftarkan manual di atas Resource)
+            
+            // Venue Trash
+            Route::get('/venue/trash', [VenueController::class, 'trash'])->name('venue.trash');
+            Route::post('/venue/{id}/restore', [VenueController::class, 'restore'])->name('venue.restore');
+            Route::delete('/venue/{id}/force-delete', [VenueController::class, 'forceDelete'])->name('venue.force-delete');
+
+            // Event Trash
+            Route::get('/event/trash', [EventController::class, 'trash'])->name('event.trash');
+            Route::post('/event/{id}/restore', [EventController::class, 'restore'])->name('event.restore');
+            Route::delete('/event/{id}/force-delete', [EventController::class, 'forceDelete'])->name('event.force-delete');
+
+            // Tiket Trash
+            Route::get('/tiket/trash', [TiketController::class, 'trash'])->name('tiket.trash');
+            Route::post('/tiket/{id}/restore', [TiketController::class, 'restore'])->name('tiket.restore');
+            Route::delete('/tiket/{id}/force-delete', [TiketController::class, 'forceDelete'])->name('tiket.force-delete');
+
+            // 3. RESOURCE MANAGEMENT
             Route::resource('tiket', TiketController::class);
             Route::resource('event', EventController::class);
             Route::resource('venue', VenueController::class);
             Route::resource('voucher', VoucherController::class);
             Route::resource('petugas', PetugasController::class)->parameters(['petugas' => 'petugas']);
             
-            // Order & Financial
+            // 4. ORDER & FINANCIAL
             Route::resource('order', AdminOrderController::class)->parameters(['order' => 'id_order']);
             Route::get('/laporan-keuangan', [AdminOrderController::class, 'laporan'])->name('laporan');
         });
