@@ -13,7 +13,7 @@
                         <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
                     </svg>
                     <div>
-                        <span class="font-bold uppercase tracking-tight">Kapasitas Penuh:</span> {{ session('error') }}
+                        <span class="font-bold uppercase tracking-tight">Peringatan:</span> {{ session('error') }}
                     </div>
                 </div>
             @endif
@@ -22,13 +22,12 @@
                 @csrf
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
                     
-                    {{-- 2. PILIH EVENT (DITAMBAH DATA-KAPASITAS) --}}
+                    {{-- 2. PILIH EVENT --}}
                     <div class="mb-8 p-6 bg-gray-50 rounded-2xl border border-gray-100">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Event</label>
                         <select name="id_event" id="id_event" class="w-full p-3 border border-gray-200 rounded-xl focus:ring-blue-500" required>
                             <option value="">-- Pilih Event --</option>
                             @foreach($events as $event)
-                                {{-- Kita selipkan data kapasitas venue di sini --}}
                                 <option value="{{ $event->id_event }}" data-kapasitas="{{ $event->venue->kapasitas }}">
                                     {{ $event->nama_event }} (Kapasitas: {{ $event->venue->kapasitas }})
                                 </option>
@@ -58,11 +57,13 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Harga (RP)</label>
-                                <input type="number" name="harga[]" class="w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="150000" required>
+                                {{-- TAMBAHKAN min="1" --}}
+                                <input type="number" name="harga[]" min="1" class="w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="150000" required>
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black uppercase text-gray-400 mb-1">Stok/Kuota</label>
-                                <input type="number" name="stok[]" class="input-stok w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="50" required>
+                                {{-- TAMBAHKAN min="1" --}}
+                                <input type="number" name="stok[]" min="1" class="input-stok w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="50" required>
                             </div>
                         </div>
                     </div>
@@ -78,7 +79,6 @@
     </div>
 
     <script>
-        // Logika Tambah Baris Tiket
         document.getElementById('btn-tambah-tiket').addEventListener('click', function() {
             const container = document.getElementById('container-tiket');
             const newRow = document.createElement('div');
@@ -89,10 +89,10 @@
                     <input type="text" name="nama_tiket[]" class="w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="Nama Tiket" required>
                 </div>
                 <div>
-                    <input type="number" name="harga[]" class="w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="Harga" required>
+                    <input type="number" name="harga[]" min="1" class="w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="Harga" required>
                 </div>
                 <div class="flex gap-2">
-                    <input type="number" name="stok[]" class="input-stok w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="Stok" required>
+                    <input type="number" name="stok[]" min="1" class="input-stok w-full rounded-lg border-gray-200 text-sm focus:ring-blue-500" placeholder="Stok" required>
                     <button type="button" class="btn-hapus-tiket p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
@@ -101,16 +101,14 @@
             container.appendChild(newRow);
         });
 
-        // Hapus Baris
         document.addEventListener('click', function(e) {
             if (e.target.closest('.btn-hapus-tiket')) {
                 const row = e.target.closest('.row-tiket');
                 row.remove();
-                cekKapasitas(); // Hitung ulang setelah dihapus
+                cekKapasitas();
             }
         });
 
-        // --- VALIDASI JAVASCRIPT REALTIME ---
         const eventSelect = document.getElementById('id_event');
         const infoKapasitas = document.getElementById('info-kapasitas');
         const maxValSpan = document.getElementById('max-val');
@@ -140,7 +138,6 @@
             }
         }
 
-        // Jalankan cekKapasitas saat event dipilih atau input stok berubah
         eventSelect.addEventListener('change', cekKapasitas);
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('input-stok')) {
@@ -148,14 +145,5 @@
             }
         });
     </script>
-
-    <style>
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    {{-- Style tetap sama --}}
 </x-app-layout>

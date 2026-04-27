@@ -18,11 +18,12 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\Voucher;
 
+// --- Public Routes ---
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
+// --- Dashboard Logic ---
 Route::get('/dashboard', function () {
     $user = Auth::user();
-    
     $data = [
         'totalPemasukan' => 0,
         'keuntungan' => 0,
@@ -43,22 +44,36 @@ Route::get('/dashboard', function () {
     return view('dashboard', $data);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// --- Authenticated Routes ---
 Route::middleware('auth')->group(function () {
     
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Pelanggan / User Features
     Route::get('/cari-tiket', [PelangganController::class, 'cariTiket'])->name('user.cari_tiket');
     Route::get('/cari-tiket/{id}', [PelangganController::class, 'showEvent'])->name('user.event.detail');
     Route::get('/checkout/{id_tiket}', [PelangganController::class, 'checkout'])->name('user.checkout');
     Route::post('/checkout-multiple', [EventController::class, 'checkoutMultiple'])->name('user.checkout_multiple');
+    
+    // Order Flow (ALUR BARU)
+    // 1. Simpan order dengan status 'pending'
     Route::post('/order/store', [OrderController::class, 'store'])->name('user.proses_bayar');
-    Route::get('/tiket-saya', [PelangganController::class, 'tiketSaya'])->name('user.tiket_saya');
+    
+    // 2. Lihat detail order (untuk munculkan tombol bayar)
     Route::get('/order/detail/{id_order}', [OrderController::class, 'show'])->name('user.order.detail');
+    
+    // 3. Eksekusi tombol bayar (mengubah 'pending' ke 'paid')
+    Route::post('/order/bayar/{id}', [OrderController::class, 'bayar'])->name('user.order.bayar');
+
+    // Post-Payment Features
+    Route::get('/tiket-saya', [PelangganController::class, 'tiketSaya'])->name('user.tiket_saya');
     Route::get('/e-tiket/{qr_code}', [OrderController::class, 'showEtiket'])->name('user.etiket.show');
     Route::post('/cek-voucher', [PelangganController::class, 'cekVoucher'])->name('user.cek_voucher');
 
+    // --- Admin & Petugas Routes ---
     Route::prefix('admin')->name('admin.')->group(function () {
         
         Route::middleware(['role:admin,petugas'])->group(function () {
@@ -68,7 +83,6 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::middleware(['role:admin'])->group(function () {
-            
             Route::patch('/user/{id_user}/toggle', [AdminUserController::class, 'toggleStatus'])->name('user.toggle');
             Route::resource('user', AdminUserController::class)->parameters(['user' => 'id_user']);
             

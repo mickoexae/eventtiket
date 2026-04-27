@@ -12,7 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <style>
         :root {
             --blue-50: #eff6ff;
@@ -673,9 +672,9 @@
                     <div class="hero-trust fade-up fade-up-d4">
                         <div class="trust-avatars">
                             <div class="trust-avatar" style="background:#3b82f6;">A</div>
-                            <div class="trust-avatar" style="background:#06b6d4;">B</div>
-                            <div class="trust-avatar" style="background:#8b5cf6;">C</div>
-                            <div class="trust-avatar" style="background:#f59e0b;">D</div>
+                            <div class="trust-avatar" style="background:#06b6d4;">I</div>
+                            <div class="trust-avatar" style="background:#8b5cf6;">P</div>
+                            <div class="trust-avatar" style="background:#f59e0b;">M</div>
                         </div>
                         <span style="margin-left: 14px;">50,000+ tiket telah terjual di platform ini</span>
                     </div>
