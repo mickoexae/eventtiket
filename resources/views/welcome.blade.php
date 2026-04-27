@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'VentPro') }} - Platform Tiket Event Modern</title>
+    <title>{{ config('app.name', 'EventByExa') }} - Platform Tiket Event Modern</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -622,7 +622,7 @@
                 <div class="brand-icon">
                     <x-application-logo class="w-5 h-5 fill-current text-white" />
                 </div>
-                <span class="brand-name">Vent<span>Pro</span></span>
+                <span class="brand-name">EventBy<span>Exa</span></span>
             </a>
 
             <nav class="nav-links">
@@ -651,7 +651,7 @@
                         dengan <span class="hero-title-accent">Presisi Penuh</span>
                     </h1>
                     <p class="hero-desc fade-up fade-up-d3">
-                        VentPro menghadirkan solusi end-to-end untuk penyelenggara event — dari penjualan tiket, scan QR, hingga laporan kehadiran real-time dalam satu dasbor terpadu.
+                        EventByExa menghadirkan solusi end-to-end untuk penyelenggara event — dari penjualan tiket, scan QR, hingga laporan kehadiran real-time dalam satu dasbor terpadu.
                     </p>
                     <div class="hero-cta fade-up fade-up-d3">
                         @auth
@@ -804,9 +804,9 @@
                 <div class="footer-brand-icon">
                     <x-application-logo class="w-4 h-4 fill-current text-white" />
                 </div>
-                <span class="footer-brand-name">Vent<span>Pro</span></span>
+                <span class="footer-brand-name">EventBy<span>Exa</span></span>
             </div>
-            <p class="footer-copy">&copy; {{ date('Y') }} VentPro. All rights reserved. Built with Laravel &amp; Tailwind CSS.</p>
+            <p class="footer-copy">&copy; {{ date('Y') }} EventByExa.</p>
         </div>
     </footer>
 
